@@ -5,11 +5,14 @@ import com.mpi.root.mpi.util.SystemUiHider;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.VideoView;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Query;
@@ -17,6 +20,9 @@ import android.app.DownloadManager.Request;
 import android.content.BroadcastReceiver;
 import android.net.Uri;
 import android.os.Bundle;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -68,6 +74,16 @@ public class MpiActivity extends Activity {
         Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.drawable.mpi_video);
         player.setVideoURI(video);
         player.start();
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                Track track = new Track();
+                track.execute("http://162.243.201.55/circular/tracks/get_last_track");
+            }
+        }, 0, 30000);
 
         // Set up an instance of SystemUiHider to control the system UI for
         // this activity.
@@ -169,5 +185,29 @@ public class MpiActivity extends Activity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+    private class Track extends AsyncTask<String, Integer, String> {
+        @Override
+        protected String doInBackground(String... params) {
+
+            HttpService fetch = new HttpService();
+
+            String result = fetch.GET(params[0]);
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            // Do whatever you need with the string, you can update your UI from here
+
+            final TextView textView = (TextView)findViewById(R.id.textView);
+            StringBuilder sb = new StringBuilder();
+
+            textView.setText(result + sb.toString());
+
+            Log.d("value of counter", sb.toString());
+
+        }
     }
 }
