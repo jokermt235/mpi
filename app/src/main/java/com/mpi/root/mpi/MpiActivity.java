@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.VideoView;
@@ -203,13 +204,10 @@ public class MpiActivity extends Activity {
             // Do whatever you need with the string, you can update your UI from here
 
             final WebView webView = (WebView)findViewById(R.id.webView);
-            StringBuilder sb = new StringBuilder();
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
 
-            webView.loadData(sb.toString(), "text/html", "UTF-8");
-
-
-
-            Log.d("value of counter", sb.toString());
+            webView.loadData(result, "text/html", "UTF-8");
 
         }
     }
