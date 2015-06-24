@@ -207,7 +207,7 @@ public class MpiActivity extends Activity {
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
 
-            webView.loadData(result, "text/html", "UTF-8");
+            webView.loadData(result, "text/html; charset=utf-8", null);
 
         }
     }
