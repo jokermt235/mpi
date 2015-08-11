@@ -1,28 +1,22 @@
 package com.mpi.root.mpi;
 
-import com.mpi.root.mpi.util.SystemUiHider;
-
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.TextView;
 import android.widget.VideoView;
-import android.app.DownloadManager;
-import android.app.DownloadManager.Query;
-import android.app.DownloadManager.Request;
-import android.content.BroadcastReceiver;
-import android.net.Uri;
-import android.os.Bundle;
 
+import com.mpi.root.mpi.util.SystemUiHider;
+
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -63,6 +57,14 @@ public class MpiActivity extends Activity {
      */
     private SystemUiHider mSystemUiHider;
 
+    private Player player = new Player();
+
+    private Settings config = new Settings();
+
+    private int videoIndex  = 1;
+
+    private File dir;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,11 +73,55 @@ public class MpiActivity extends Activity {
 
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
-        final VideoView player = (VideoView)findViewById(R.id.videoView);
+        final VideoView mediaPlayer = (VideoView)findViewById(R.id.videoView);
 
-        Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.drawable.mpi_video);
-        player.setVideoURI(video);
-        player.start();
+
+        final WebView webView = (WebView)findViewById(R.id.webView);
+
+        final File files[] = player.getLocalTracks();
+
+        if(files == null){
+            Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.drawable.mpi_video);
+            mediaPlayer.setVideoURI(video);
+            player.setCurrentTrack(video.getPath(), 0);
+            mediaPlayer.start();
+        }else{
+
+            try{
+                mediaPlayer.setVideoPath(files[0].getPath());
+            }catch (IllegalArgumentException e){
+                e.printStackTrace();
+            }catch (IllegalStateException e){
+                e.printStackTrace();
+            }
+
+            mediaPlayer.start();
+
+        }
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                final File tracks[] = player.getLocalTracks();
+                try{
+                    mediaPlayer.setVideoPath(tracks[videoIndex].getPath());
+                }catch (IllegalArgumentException e){
+                    e.printStackTrace();
+                }catch (IllegalStateException e){
+                    e.printStackTrace();
+                }
+
+                mediaPlayer.start();
+
+                videoIndex++;
+
+                if(videoIndex >= tracks.length){
+                    videoIndex = 0;
+                }
+
+            }
+        });
+
 
         Timer timer = new Timer();
 
@@ -83,7 +129,7 @@ public class MpiActivity extends Activity {
             @Override
             public void run() {
                 Track track = new Track();
-                track.execute("http://162.243.201.55/circular/tracks/get_last_track");
+                track.execute( config.APP_URL + "/get_last_track");
             }
         }, 0, 30000);
 

@@ -7,5 +7,5 @@ package com.mpi.root.mpi;
 Monitoring class uses to do device
 state, track state, system configuration.
  */
-public class Monitoring {
+public class Monitoring extends  Settings {
 }
